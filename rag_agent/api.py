@@ -5,8 +5,12 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any, List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.responses import JSONResponse
 
 from rag_agent.config import ensure_google_api_key
 from rag_agent.graph_builder import build_graph
@@ -119,7 +123,13 @@ async def lifespan(app: FastAPI):
     yield
 
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Citation-grounded RAG Agent", version="2.0.0", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    lambda req, exc: JSONResponse(status_code=429, content={"detail": f"Rate limit exceeded: {exc.detail}"}),
+)
 
 
 @app.get("/healthz")
@@ -139,7 +149,8 @@ def cache_clear():
 
 
 @app.post("/v1/chat", response_model=ChatResponse, response_model_exclude_none=True)
-async def chat(req: ChatRequest):
+@limiter.limit("30/minute")
+async def chat(request: Request, req: ChatRequest):
     trace_id = str(uuid.uuid4())
 
     # --- semantic cache lookup ---

@@ -16,6 +16,7 @@ requests
 # API service
 fastapi
 uvicorn
+slowapi
 
 # PostgreSQL / pgvector query layer
 psycopg[binary]

@@ -38,37 +38,7 @@ measures chain-coverage and step-coverage metrics.
 
 ## Architecture Overview
 
-```
-                         +-------------------+
-                         |    Amazon S3      |
-                         |   (Data Lake)     |
-                         |  raw/ PDF,HTML,TXT|
-                         +---------+---------+
-                                   |
-                          S3 Event / Manual
-                                   |
-                         +---------v---------+
-                         |   AWS Glue Job    |
-                         |  (Python Shell)   |
-                         |  parse -> chunk   |
-                         |  -> embed -> load |
-                         +---------+---------+
-                                   |
-                         +---------v---------+
-                         | Amazon RDS        |
-                         | PostgreSQL 16     |
-                         | + pgvector        |
-                         +---------+---------+
-                                   |
-                   +---------------+---------------+
-                   |                               |
-          +--------v--------+            +---------v--------+
-          |   FastAPI        |            |  Streamlit       |
-          |   + LangGraph    |<-----------+  Dashboard       |
-          |   + Semantic     |   HTTP     |                  |
-          |     Cache        |            |                  |
-          +-----------------+            +------------------+
-```
+![Architecture Overview](assets/archi_overview.png)
 
 1. **Extract** -- Raw documents (PDF, HTML, plain text) are uploaded to an S3
    bucket serving as the data lake.
@@ -437,6 +407,21 @@ After deployment:
 1. Upload documents to the S3 bucket under `raw/`.
 2. Run the Glue job from the AWS console or CLI.
 3. Access the API via the ALB DNS name output.
+
+---
+
+## Rate Limiting
+
+The `/v1/chat` endpoint is rate-limited to **30 requests / minute per IP**
+via [slowapi](https://github.com/laurentS/slowapi).  Exceeding the limit
+returns HTTP 429:
+
+```json
+{"detail": "Rate limit exceeded: 30 per 1 minute"}
+```
+
+Implementation: `rag_agent/api.py` creates a `Limiter(key_func=get_remote_address)`
+and decorates the chat endpoint with `@limiter.limit("30/minute")`.
 
 ---
 
