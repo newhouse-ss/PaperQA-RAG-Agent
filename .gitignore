@@ -14,3 +14,8 @@ node_modules/
 .streamlit/
 /AWS_keys.txt
 *.pyc
+docs/
+debug_cli.py
+tips.md
+urls_fintech
+urls.txt

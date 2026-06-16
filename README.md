@@ -1,5 +1,23 @@
 # Citation-grounded RAG Agent with Evaluation
 
+> 日本語版のプロジェクト説明 / README.md はこちら： [README_日本語.md](./README_日本語.md)
+
+## Project Overview
+
+This is a cloud-native, adaptive RAG agent system that I developed end-to-end on
+my own, from requirements definition through to deployment and operation.
+
+Agent architecture: Built on LangGraph, it features autonomous query routing,
+multi-hop reasoning, and self-correction of retrieval results, producing answers
+with traceable, evidence-grounded citations.
+
+AWS data platform: I built a robust data infrastructure spanning the entire flow
+-- from ingestion into an S3 data lake, through an automated ETL pipeline on AWS
+Glue (parsing, chunking, and dimensionality reduction of embedding vectors), to
+persistence in Amazon RDS PostgreSQL with pgvector (HNSW index).
+
+## Technical Stack Overview
+
 An adaptive Retrieval-Augmented Generation system built on LangGraph that
 answers multi-hop questions with traceable source citations.  The project
 implements a complete cloud-native data pipeline: raw documents land in Amazon
