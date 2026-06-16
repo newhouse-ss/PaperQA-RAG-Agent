@@ -1,6 +1,6 @@
 # Citation-grounded RAG Agent with Evaluation
 
-> 日本語版のプロジェクト説明 / README.md はこちら： [README_日本語.md](./README_日本語.md)
+日本語版のプロジェクト説明 / README.md はこちら： [README_日本語.md](./README_日本語.md)
 
 ## Project Overview
 
